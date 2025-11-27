@@ -11,11 +11,6 @@
       "src": "/api/extract",
       "dest": "api/extract.py"
     }
-  ],
-  "functions": {
-    "api/extract.py": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
 
