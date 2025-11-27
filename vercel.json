@@ -8,9 +8,18 @@
   ],
   "routes": [
     {
-      "src": "/api/extract",
-      "dest": "api/extract.py"
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/public/index.html"
     }
   ]
 }
-
