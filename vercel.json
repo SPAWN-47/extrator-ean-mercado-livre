@@ -1,4 +1,10 @@
 {
+  "builds": [
+    {
+      "src": "api/extract.py",
+      "use": "@vercel/python"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
