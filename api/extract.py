@@ -1,6 +1,6 @@
 """
 API Serverless para extração de EAN/GTIN
-Compatível com Vercel Serverless Functions Python
+Vercel Python Runtime
 """
 
 import json
@@ -9,9 +9,9 @@ from bs4 import BeautifulSoup
 import re
 
 def handler(request):
-    """
-    Handler para Vercel Serverless Function Python
-    """
+    """Handler para Vercel Python Serverless Function"""
+    
+    # Headers CORS
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -20,7 +20,7 @@ def handler(request):
     }
     
     try:
-        # Obter método
+        # Método HTTP
         method = getattr(request, 'method', 'GET')
         
         # CORS preflight
@@ -31,18 +31,18 @@ def handler(request):
                 'body': ''
             }
         
-        # Obter body
+        # Obter URLs do body
         urls = []
         if method == 'POST':
             try:
-                body_str = getattr(request, 'body', '{}')
-                if isinstance(body_str, bytes):
-                    body_str = body_str.decode('utf-8')
-                if body_str:
-                    body = json.loads(body_str)
-                    urls = body.get('urls', [])
+                body = getattr(request, 'body', '{}')
+                if isinstance(body, bytes):
+                    body = body.decode('utf-8')
+                if body:
+                    data = json.loads(body)
+                    urls = data.get('urls', [])
             except:
-                urls = []
+                pass
         
         if not urls:
             return {
@@ -51,12 +51,11 @@ def handler(request):
                 'body': json.dumps({'error': 'Nenhuma URL fornecida'}, ensure_ascii=False)
             }
         
-        # Processar URLs
-        urls = urls[:10]  # Limitar a 10
+        # Processar URLs (máximo 10)
         results = []
-        for url in urls:
+        for url in urls[:10]:
             try:
-                result = get_ean_and_title(url)
+                result = extract_ean(url)
                 results.append({
                     'url': url,
                     'ean': result.get('ean'),
@@ -68,7 +67,7 @@ def handler(request):
                     'url': url,
                     'ean': None,
                     'title': None,
-                    'status': f'❌ Erro: {str(e)[:30]}'
+                    'status': f'❌ Erro'
                 })
         
         return {
@@ -80,7 +79,7 @@ def handler(request):
                 'success': sum(1 for r in results if r.get('status') == '✅')
             }, ensure_ascii=False)
         }
-    
+        
     except Exception as e:
         return {
             'statusCode': 500,
@@ -89,13 +88,13 @@ def handler(request):
         }
 
 
-def get_ean_and_title(url):
-    """Extrai EAN/GTIN e título do produto"""
+def extract_ean(url):
+    """Extrai EAN/GTIN de uma URL do Mercado Livre"""
     result = {'ean': None, 'title': None, 'status': '❌'}
     
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'pt-BR,pt;q=0.9',
             'Referer': 'https://www.google.com/'
@@ -106,7 +105,7 @@ def get_ean_and_title(url):
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Buscar EAN no JSON-LD
+        # Buscar em JSON-LD
         for script in soup.find_all('script', type='application/ld+json'):
             if script.string:
                 try:
@@ -136,16 +135,15 @@ def get_ean_and_title(url):
                 if script.string and '__PRELOADED_STATE__' in script.string:
                     matches = re.findall(r'"gtin[13]?":\s*"(\d+)"|"ean":\s*"(\d+)"', script.string)
                     if matches:
-                        for match in matches:
-                            ean_candidate = match[0] or match[1]
-                            if len(ean_candidate) >= 8:
-                                result['ean'] = ean_candidate
-                                result['status'] = '✅'
-                                break
+                        ean_candidate = matches[0][0] or matches[0][1]
+                        if len(ean_candidate) >= 8:
+                            result['ean'] = ean_candidate
+                            result['status'] = '✅'
+                            break
         
     except requests.exceptions.Timeout:
         result['status'] = '⏱️ Timeout'
     except Exception as e:
-        result['status'] = f'❌ Erro: {str(e)[:30]}'
+        result['status'] = f'❌ Erro'
     
     return result
