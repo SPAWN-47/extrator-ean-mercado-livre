@@ -360,28 +360,53 @@
         
         function updateTable() {
             const resultsBody = document.getElementById('resultsBody');
+            const table = document.getElementById('resultsTable');
+            
+            // Forçar estilos na tabela
+            if (table) {
+                table.style.setProperty('background', '#000000', 'important');
+                table.style.setProperty('border-radius', '8px', 'important');
+            }
+            
+            // Forçar estilos no thead
+            const thead = table?.querySelector('thead');
+            if (thead) {
+                thead.style.setProperty('background', '#0a0a0a', 'important');
+                thead.querySelectorAll('th').forEach(th => {
+                    th.style.setProperty('background', '#0a0a0a', 'important');
+                    th.style.setProperty('color', '#ffffff', 'important');
+                });
+            }
+            
             resultsBody.innerHTML = resultsData.map(result => `
-                <tr style="background: #000000;">
-                    <td class="${result.status === '✅' ? 'status-success' : 'status-error'}" style="background: #000000; color: #e0e0e0;">${result.status}</td>
-                    <td style="background: #000000; color: #e0e0e0;">${result.ean || 'Não encontrado'}</td>
-                    <td style="background: #000000; color: #e0e0e0;">${result.title || 'Não encontrado'}</td>
-                    <td style="background: #000000; color: #e0e0e0;"><a href="${result.url}" target="_blank" style="color: #667eea;">${result.url}</a></td>
+                <tr style="background: #000000 !important;">
+                    <td class="${result.status === '✅' ? 'status-success' : 'status-error'}" style="background: #000000 !important; color: #e0e0e0 !important;">${result.status}</td>
+                    <td style="background: #000000 !important; color: #e0e0e0 !important;">${result.ean || 'Não encontrado'}</td>
+                    <td style="background: #000000 !important; color: #e0e0e0 !important;">${result.title || 'Não encontrado'}</td>
+                    <td style="background: #000000 !important; color: #e0e0e0 !important;"><a href="${result.url}" target="_blank" style="color: #667eea !important;">${result.url}</a></td>
                 </tr>
             `).join('');
+            
+            // Forçar estilos em todas as células
+            resultsBody.querySelectorAll('td').forEach(td => {
+                td.style.setProperty('background', '#000000', 'important');
+                td.style.setProperty('color', '#e0e0e0', 'important');
+            });
             
             // Adicionar event listeners para hover
             const rows = resultsBody.querySelectorAll('tr');
             rows.forEach(row => {
+                row.style.setProperty('background', '#000000', 'important');
                 row.addEventListener('mouseenter', function() {
-                    this.style.background = '#1a1a1a';
+                    this.style.setProperty('background', '#1a1a1a', 'important');
                     this.querySelectorAll('td').forEach(td => {
-                        td.style.background = '#1a1a1a';
+                        td.style.setProperty('background', '#1a1a1a', 'important');
                     });
                 });
                 row.addEventListener('mouseleave', function() {
-                    this.style.background = '#000000';
+                    this.style.setProperty('background', '#000000', 'important');
                     this.querySelectorAll('td').forEach(td => {
-                        td.style.background = '#000000';
+                        td.style.setProperty('background', '#000000', 'important');
                     });
                 });
             });
@@ -431,6 +456,17 @@
             link.download = `ean_extraction_${Date.now()}.csv`;
             link.click();
         }
+        // Aplicar estilos quando a página carregar
+        window.addEventListener('DOMContentLoaded', function() {
+            const table = document.getElementById('resultsTable');
+            if (table) {
+                table.style.setProperty('background', '#000000', 'important');
+                const thead = table.querySelector('thead');
+                if (thead) {
+                    thead.style.setProperty('background', '#0a0a0a', 'important');
+                }
+            }
+        });
     </script>
 </body>
 </html>
