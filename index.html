@@ -169,39 +169,52 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: #000000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            background: #000000 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        table,
+        table * {
+            box-sizing: border-box;
         }
         
         th, td {
             padding: 16px;
             text-align: left;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid #1a1a1a !important;
         }
         
         th {
-            background: #0a0a0a;
+            background: #0a0a0a !important;
             font-weight: 600;
-            color: #ffffff;
+            color: #ffffff !important;
             text-transform: uppercase;
             font-size: 12px;
             letter-spacing: 0.5px;
-            border-bottom: 2px solid #333333;
+            border-bottom: 2px solid #333333 !important;
         }
         
         td {
-            color: #e0e0e0;
-            background: #000000;
+            color: #e0e0e0 !important;
+            background: #000000 !important;
+        }
+        
+        tbody tr {
+            background: #000000 !important;
+        }
+        
+        tbody tr td {
+            background: #000000 !important;
         }
         
         tr:hover {
-            background: #1a1a1a;
+            background: #1a1a1a !important;
         }
         
         tr:hover td {
-            background: #1a1a1a;
+            background: #1a1a1a !important;
         }
         
         .status-success {
@@ -333,6 +346,11 @@
                         },
                         body: JSON.stringify({ urls: batch })
                     });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Erro ${response.status}: ${errorText.substring(0, 100)}`);
+                    }
                     
                     const data = await response.json();
                     if (data.results) {
