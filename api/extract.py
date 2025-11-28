@@ -12,10 +12,9 @@ from typing import Dict, Optional
 def handler(request):
     """
     Handler para Vercel Serverless Function
-    Formato correto do Vercel Python: retorna Response diretamente
     """
     # Headers CORS
-    cors_headers = {
+    headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -23,37 +22,37 @@ def handler(request):
     }
     
     # Handle OPTIONS (CORS preflight)
-    if request.method == 'OPTIONS':
+    method = getattr(request, 'method', 'GET')
+    if method == 'OPTIONS':
         return {
             'statusCode': 200,
-            'headers': cors_headers,
+            'headers': headers,
             'body': ''
         }
     
     try:
         # Obter dados da requisição
-        if request.method == 'POST':
+        if method == 'POST':
             try:
-                if hasattr(request, 'json'):
+                body_str = getattr(request, 'body', '{}')
+                if isinstance(body_str, str):
+                    body = json.loads(body_str)
+                elif hasattr(request, 'json'):
                     body = request.json
                 else:
-                    body = json.loads(request.body) if hasattr(request, 'body') else {}
+                    body = {}
             except:
                 body = {}
             urls = body.get('urls', [])
         else:
-            # GET request - obter da query string
-            if hasattr(request, 'args'):
-                urls_param = request.args.get('urls', '')
-            else:
-                urls_param = ''
-            urls = [url.strip() for url in urls_param.split(',') if url.strip()]
+            # GET request
+            urls = []
         
         if not urls:
             return {
                 'statusCode': 400,
-                'headers': cors_headers,
-                'body': json.dumps({'error': 'Nenhuma URL fornecida'})
+                'headers': headers,
+                'body': json.dumps({'error': 'Nenhuma URL fornecida'}, ensure_ascii=False)
             }
         
         # Processar URLs (limitar a 10 por vez para evitar timeout)
@@ -68,7 +67,7 @@ def handler(request):
         
         return {
             'statusCode': 200,
-            'headers': cors_headers,
+            'headers': headers,
             'body': json.dumps({
                 'results': results,
                 'total': len(results),
@@ -77,15 +76,10 @@ def handler(request):
         }
     
     except Exception as e:
-        import traceback
-        error_msg = str(e)
         return {
             'statusCode': 500,
-            'headers': cors_headers,
-            'body': json.dumps({
-                'error': error_msg,
-                'traceback': traceback.format_exc() if hasattr(traceback, 'format_exc') else ''
-            })
+            'headers': headers,
+            'body': json.dumps({'error': str(e)}, ensure_ascii=False)
         }
 
 
