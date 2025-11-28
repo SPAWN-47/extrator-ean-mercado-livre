@@ -12,6 +12,7 @@ from typing import Dict, Optional
 def handler(request):
     """
     Handler para Vercel Serverless Function
+    Formato: retorna dict com statusCode, headers, body
     """
     # Headers CORS
     headers = {
@@ -21,32 +22,40 @@ def handler(request):
         'Access-Control-Allow-Headers': 'Content-Type'
     }
     
-    # Handle OPTIONS (CORS preflight)
-    method = getattr(request, 'method', 'GET')
-    if method == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': ''
-        }
-    
     try:
+        # Obter método HTTP
+        method = getattr(request, 'method', 'GET')
+        
+        # Handle OPTIONS (CORS preflight)
+        if method == 'OPTIONS':
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': ''
+            }
+        
         # Obter dados da requisição
+        urls = []
         if method == 'POST':
             try:
-                body_str = getattr(request, 'body', '{}')
-                if isinstance(body_str, str):
-                    body = json.loads(body_str)
+                # Tentar obter body de diferentes formas
+                if hasattr(request, 'body'):
+                    body_str = request.body
+                    if isinstance(body_str, bytes):
+                        body_str = body_str.decode('utf-8')
+                    body = json.loads(body_str) if body_str else {}
                 elif hasattr(request, 'json'):
                     body = request.json
                 else:
                     body = {}
-            except:
-                body = {}
-            urls = body.get('urls', [])
-        else:
-            # GET request
-            urls = []
+                urls = body.get('urls', [])
+            except Exception as e:
+                # Se falhar, retornar erro
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Erro ao processar body: {str(e)}'}, ensure_ascii=False)
+                }
         
         if not urls:
             return {
@@ -76,10 +85,15 @@ def handler(request):
         }
     
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
         return {
             'statusCode': 500,
             'headers': headers,
-            'body': json.dumps({'error': str(e)}, ensure_ascii=False)
+            'body': json.dumps({
+                'error': str(e),
+                'traceback': error_trace
+            }, ensure_ascii=False)
         }
 
 
