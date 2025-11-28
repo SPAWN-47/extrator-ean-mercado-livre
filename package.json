@@ -1,0 +1,9 @@
+{
+  "name": "extrator-ean-mercado-livre",
+  "version": "1.0.0",
+  "description": "Extrator de códigos EAN/GTIN do Mercado Livre",
+  "scripts": {
+    "start": "echo 'Static site - no build needed'"
+  }
+}
+
