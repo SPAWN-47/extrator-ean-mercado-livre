@@ -253,16 +253,16 @@
         
         <div class="results" id="results">
             <div class="stats" id="stats"></div>
-            <table id="resultsTable">
-                <thead>
+            <table id="resultsTable" style="background: #000000; border-radius: 8px; overflow: hidden;">
+                <thead style="background: #0a0a0a;">
                     <tr>
-                        <th>Status</th>
-                        <th>EAN/GTIN</th>
-                        <th>Título</th>
-                        <th>URL</th>
+                        <th style="background: #0a0a0a; color: #ffffff;">Status</th>
+                        <th style="background: #0a0a0a; color: #ffffff;">EAN/GTIN</th>
+                        <th style="background: #0a0a0a; color: #ffffff;">Título</th>
+                        <th style="background: #0a0a0a; color: #ffffff;">URL</th>
                     </tr>
                 </thead>
-                <tbody id="resultsBody"></tbody>
+                <tbody id="resultsBody" style="background: #000000;"></tbody>
             </table>
             <button class="download-btn" onclick="downloadCSV()">📥 Baixar CSV</button>
         </div>
@@ -341,13 +341,30 @@
         function updateTable() {
             const resultsBody = document.getElementById('resultsBody');
             resultsBody.innerHTML = resultsData.map(result => `
-                <tr>
-                    <td class="${result.status === '✅' ? 'status-success' : 'status-error'}">${result.status}</td>
-                    <td>${result.ean || 'Não encontrado'}</td>
-                    <td>${result.title || 'Não encontrado'}</td>
-                    <td><a href="${result.url}" target="_blank">${result.url}</a></td>
+                <tr style="background: #000000;">
+                    <td class="${result.status === '✅' ? 'status-success' : 'status-error'}" style="background: #000000; color: #e0e0e0;">${result.status}</td>
+                    <td style="background: #000000; color: #e0e0e0;">${result.ean || 'Não encontrado'}</td>
+                    <td style="background: #000000; color: #e0e0e0;">${result.title || 'Não encontrado'}</td>
+                    <td style="background: #000000; color: #e0e0e0;"><a href="${result.url}" target="_blank" style="color: #667eea;">${result.url}</a></td>
                 </tr>
             `).join('');
+            
+            // Adicionar event listeners para hover
+            const rows = resultsBody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.background = '#1a1a1a';
+                    this.querySelectorAll('td').forEach(td => {
+                        td.style.background = '#1a1a1a';
+                    });
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.background = '#000000';
+                    this.querySelectorAll('td').forEach(td => {
+                        td.style.background = '#000000';
+                    });
+                });
+            });
         }
         
         function updateStats() {
