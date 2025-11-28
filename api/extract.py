@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import re
 
 def handler(request):
+    """Vercel Python Serverless Function Handler"""
+    
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -12,21 +14,31 @@ def handler(request):
     }
     
     try:
-        method = getattr(request, 'method', 'GET')
+        # Obter método HTTP
+        method = getattr(request, 'method', None) or 'GET'
         
+        # CORS preflight
         if method == 'OPTIONS':
             return {'statusCode': 200, 'headers': headers, 'body': ''}
         
+        # Obter body
         urls = []
         if method == 'POST':
             try:
-                body = getattr(request, 'body', b'{}')
+                body = getattr(request, 'body', None)
+                if body is None:
+                    body = b'{}'
                 if isinstance(body, bytes):
                     body = body.decode('utf-8')
-                data = json.loads(body) if body else {}
-                urls = data.get('urls', [])
-            except:
-                urls = []
+                if body and body.strip():
+                    data = json.loads(body)
+                    urls = data.get('urls', [])
+            except Exception as e:
+                return {
+                    'statusCode': 400,
+                    'headers': headers,
+                    'body': json.dumps({'error': f'Erro ao processar body: {str(e)}'})
+                }
         
         if not urls:
             return {
@@ -35,6 +47,7 @@ def handler(request):
                 'body': json.dumps({'error': 'Nenhuma URL fornecida'})
             }
         
+        # Processar URLs
         results = []
         for url in urls[:10]:
             try:
@@ -45,7 +58,7 @@ def handler(request):
                     'title': title,
                     'status': status
                 })
-            except:
+            except Exception as e:
                 results.append({
                     'url': url,
                     'ean': None,
@@ -62,15 +75,19 @@ def handler(request):
                 'success': sum(1 for r in results if r.get('status') == '✅')
             }, ensure_ascii=False)
         }
+        
     except Exception as e:
+        import traceback
+        error_msg = str(e)
         return {
             'statusCode': 500,
             'headers': headers,
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps({'error': error_msg})
         }
 
 
 def extract_data(url):
+    """Extrai EAN/GTIN e título de uma URL"""
     ean = None
     title = None
     status = '❌'
@@ -87,7 +104,7 @@ def extract_data(url):
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # JSON-LD
+        # Buscar em JSON-LD
         for script in soup.find_all('script', type='application/ld+json'):
             if script.string:
                 try:
@@ -119,7 +136,10 @@ def extract_data(url):
                         if len(ean) >= 8:
                             status = '✅'
                             break
-    except:
+                            
+    except requests.exceptions.Timeout:
+        status = '⏱️ Timeout'
+    except Exception:
         status = '❌'
     
     return ean, title, status
