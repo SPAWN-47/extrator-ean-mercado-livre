@@ -12,10 +12,10 @@ from typing import Dict, Optional
 def handler(request):
     """
     Handler para Vercel Serverless Function
-    Formato: https://vercel.com/docs/functions/serverless-functions/runtimes/python
+    Formato correto do Vercel Python: retorna Response diretamente
     """
     # Headers CORS
-    headers = {
+    cors_headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -24,23 +24,37 @@ def handler(request):
     
     # Handle OPTIONS (CORS preflight)
     if request.method == 'OPTIONS':
-        return (200, headers, '')
+        return {
+            'statusCode': 200,
+            'headers': cors_headers,
+            'body': ''
+        }
     
     try:
         # Obter dados da requisição
         if request.method == 'POST':
             try:
-                body = json.loads(request.body)
+                if hasattr(request, 'json'):
+                    body = request.json
+                else:
+                    body = json.loads(request.body) if hasattr(request, 'body') else {}
             except:
                 body = {}
             urls = body.get('urls', [])
         else:
             # GET request - obter da query string
-            urls_param = request.args.get('urls', '')
+            if hasattr(request, 'args'):
+                urls_param = request.args.get('urls', '')
+            else:
+                urls_param = ''
             urls = [url.strip() for url in urls_param.split(',') if url.strip()]
         
         if not urls:
-            return (400, headers, json.dumps({'error': 'Nenhuma URL fornecida'}))
+            return {
+                'statusCode': 400,
+                'headers': cors_headers,
+                'body': json.dumps({'error': 'Nenhuma URL fornecida'})
+            }
         
         # Processar URLs (limitar a 10 por vez para evitar timeout)
         urls = urls[:10]
@@ -52,14 +66,27 @@ def handler(request):
                 **result
             })
         
-        return (200, headers, json.dumps({
-            'results': results,
-            'total': len(results),
-            'success': sum(1 for r in results if r['status'] == '✅')
-        }))
+        return {
+            'statusCode': 200,
+            'headers': cors_headers,
+            'body': json.dumps({
+                'results': results,
+                'total': len(results),
+                'success': sum(1 for r in results if r['status'] == '✅')
+            }, ensure_ascii=False)
+        }
     
     except Exception as e:
-        return (500, headers, json.dumps({'error': str(e)}))
+        import traceback
+        error_msg = str(e)
+        return {
+            'statusCode': 500,
+            'headers': cors_headers,
+            'body': json.dumps({
+                'error': error_msg,
+                'traceback': traceback.format_exc() if hasattr(traceback, 'format_exc') else ''
+            })
+        }
 
 
 def get_ean_and_title(url: str) -> Dict[str, Optional[str]]:
