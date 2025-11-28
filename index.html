@@ -7,6 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="version" content="v3-black-table">
     <style>
         * {
             margin: 0;
@@ -30,28 +31,43 @@
             padding: 40px;
         }
         
+        /* Estilos forçados para tabela preta - v2 */
+        #resultsTable,
+        #resultsTable * {
+            box-sizing: border-box;
+        }
+        
         #resultsTable {
             background: #000000 !important;
-            border-radius: 8px;
-            overflow: hidden;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            border: none !important;
         }
         
         #resultsTable thead {
             background: #0a0a0a !important;
+            border: none !important;
         }
         
         #resultsTable thead th {
             background: #0a0a0a !important;
             color: #ffffff !important;
+            border: none !important;
+            border-bottom: 2px solid #333333 !important;
         }
         
         #resultsTable tbody {
             background: #000000 !important;
         }
         
+        #resultsTable tbody tr {
+            background: #000000 !important;
+        }
+        
         #resultsTable tbody td {
             background: #000000 !important;
             color: #e0e0e0 !important;
+            border-bottom: 1px solid #1a1a1a !important;
         }
         
         #resultsTable tbody tr:hover {
@@ -60,6 +76,10 @@
         
         #resultsTable tbody tr:hover td {
             background: #1a1a1a !important;
+        }
+        
+        #resultsTable a {
+            color: #667eea !important;
         }
         
         h1 {
