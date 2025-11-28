@@ -165,47 +165,73 @@
             display: none;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        /* TABELA PRETA PROFISSIONAL - ESTILOS FORÇADOS */
+        #resultsTable {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin-top: 20px !important;
             background: #000000 !important;
             border-radius: 8px !important;
             overflow: hidden !important;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
         }
         
-        table,
-        table * {
-            box-sizing: border-box;
+        #resultsTable thead {
+            background: #0a0a0a !important;
         }
         
-        th, td {
-            padding: 16px;
-            text-align: left;
+        #resultsTable thead th {
+            background: #0a0a0a !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            font-size: 12px !important;
+            letter-spacing: 0.5px !important;
+            padding: 16px !important;
+            border-bottom: 2px solid #333333 !important;
+            text-align: left !important;
+        }
+        
+        #resultsTable tbody {
+            background: #000000 !important;
+        }
+        
+        #resultsTable tbody tr {
+            background: #000000 !important;
+        }
+        
+        #resultsTable tbody td {
+            background: #000000 !important;
+            color: #e0e0e0 !important;
+            padding: 16px !important;
             border-bottom: 1px solid #1a1a1a !important;
+            text-align: left !important;
+        }
+        
+        #resultsTable tbody tr:hover {
+            background: #1a1a1a !important;
+        }
+        
+        #resultsTable tbody tr:hover td {
+            background: #1a1a1a !important;
+        }
+        
+        /* Fallback para seletores genéricos */
+        table {
+            background: #000000 !important;
         }
         
         th {
             background: #0a0a0a !important;
-            font-weight: 600;
             color: #ffffff !important;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #333333 !important;
         }
         
         td {
+            background: #000000 !important;
             color: #e0e0e0 !important;
-            background: #000000 !important;
         }
         
-        tbody tr {
-            background: #000000 !important;
-        }
-        
-        tbody tr td {
+        tr {
             background: #000000 !important;
         }
         
