@@ -369,6 +369,9 @@
                 updateStats();
                 results.style.display = 'block';
                 
+                // Forçar aplicação de estilos pretos
+                setTimeout(applyBlackTableStyles, 100);
+                
             } catch (error) {
                 alert('❌ Erro ao processar URLs: ' + error.message);
             } finally {
@@ -474,17 +477,59 @@
             link.download = `ean_extraction_${Date.now()}.csv`;
             link.click();
         }
-        // Aplicar estilos quando a página carregar
-        window.addEventListener('DOMContentLoaded', function() {
+        // Função para aplicar estilos pretos na tabela
+        function applyBlackTableStyles() {
             const table = document.getElementById('resultsTable');
-            if (table) {
-                table.style.setProperty('background', '#000000', 'important');
-                const thead = table.querySelector('thead');
-                if (thead) {
-                    thead.style.setProperty('background', '#0a0a0a', 'important');
-                }
+            if (!table) return;
+            
+            // Estilos na tabela
+            table.style.setProperty('background', '#000000', 'important');
+            table.style.setProperty('border-radius', '8px', 'important');
+            
+            // Estilos no thead
+            const thead = table.querySelector('thead');
+            if (thead) {
+                thead.style.setProperty('background', '#0a0a0a', 'important');
+                thead.querySelectorAll('th').forEach(th => {
+                    th.style.setProperty('background', '#0a0a0a', 'important');
+                    th.style.setProperty('color', '#ffffff', 'important');
+                });
             }
+            
+            // Estilos no tbody
+            const tbody = table.querySelector('tbody');
+            if (tbody) {
+                tbody.style.setProperty('background', '#000000', 'important');
+                tbody.querySelectorAll('tr').forEach(tr => {
+                    tr.style.setProperty('background', '#000000', 'important');
+                    tr.querySelectorAll('td').forEach(td => {
+                        td.style.setProperty('background', '#000000', 'important');
+                        td.style.setProperty('color', '#e0e0e0', 'important');
+                    });
+                });
+            }
+        }
+        
+        // Aplicar estilos quando a página carregar
+        window.addEventListener('DOMContentLoaded', applyBlackTableStyles);
+        
+        // Aplicar estilos quando a tabela for exibida
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const results = document.getElementById('results');
+                    if (results && results.style.display !== 'none') {
+                        setTimeout(applyBlackTableStyles, 100);
+                    }
+                }
+            });
         });
+        
+        // Observar mudanças no elemento results
+        const results = document.getElementById('results');
+        if (results) {
+            observer.observe(results, { attributes: true, attributeFilter: ['style'] });
+        }
     </script>
 </body>
 </html>
